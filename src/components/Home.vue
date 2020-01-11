@@ -1,9 +1,5 @@
 <template>
     <v-container>
-        <!--    <v-layout-->
-        <!--      text-center-->
-        <!--    >-->
-
         <v-row>
             <v-col cols="12">
                 <h1 class="font-weight-black text-center mb-8">Aktualne predstave</h1>
@@ -12,54 +8,50 @@
 
         <v-row class="justify-center">
             <v-col cols="10" class="d-flex justify-center">
-                <div v-for="event in events" :key="event.id" class="white px-8 py-4 text-center elevation-5 last-no-mr" style="border-radius: 7px; min-width: 200px">
-                    <h2 class="title font-weight-medium">{{ event.title }}</h2>
+                <div v-for="event in events" :key="event._id" class="white px-8 py-4 text-center elevation-5 last-no-mr" style="border-radius: 7px; min-width: 200px">
+                    <h2 class="title font-weight-medium">{{ event.name }}</h2>
                     <p class="body-2 mt-1 mb-0 cyan--text text--darken-3">
-                        {{ event.date }}
+                        {{ getDateAndTime(event.startDate) }}
                     </p>
-                    <p class="body-2 cyan--text text--darken-3">
-                        {{ event.venue }}
+                    <p class="body-2 cyan--text text--darken-3" v-if="event.venue && event.venue.name">
+                        {{ event.venue.name }}
                     </p>
                     <v-btn outlined small color="secondary">
-                      Nakup
+                      Nakup / {{ event.price }}€
                     </v-btn>
                 </div>
             </v-col>
         </v-row>
-
-        <!--    </v-layout>-->
     </v-container>
 </template>
 
 <script>
+	const axios = require('axios');
+
 	export default {
 		name: 'HelloWorld',
 
 		data: () => ({
-			events: [
-				{
-					id: '1',
-					title: 'Star Wars',
-					date: '10. 1. ob 20:00',
-					price: '4€',
-					venue: 'Velika dvorana',
-				},
-				{
-					id: '2',
-					title: 'Knives Out',
-					date: '11. 1. ob 18:00',
-					price: '4€',
-					venue: 'Velika dvorana',
-				},
-				{
-					id: '3',
-					title: 'Zgodbe iz kostanjevih gozdov',
-					date: '12. 1. ob 14:00',
-					price: '3€',
-					venue: 'Mala dvorana',
-				}
-			],
+			events: [],
 		}),
+        methods: {
+			getDateAndTime: function (eventDate) {
+				const date = new Date(eventDate);
+				const hours = date.getHours() < 10 ? `${date.getHours()}0` : `${date.getHours()}`;
+				const minutes = date.getMinutes() < 10 ? `${date.getMinutes()}0` : `${date.getHours()}`;
+
+				return `${date.getDate()}. ${date.getMonth() + 1}. ob ${hours}:${minutes}`;
+			}
+        },
+        mounted() {
+			axios
+				.get(`${process.env.VUE_APP_API}/events`)
+				.then(response => {
+					if (response && response.data) {
+						this.events = response.data
+					}
+				})
+		},
 	};
 </script>
 
